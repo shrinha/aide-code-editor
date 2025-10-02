@@ -128,6 +128,13 @@ Visit `http://localhost:3000` in your browser.
 
 ---
 
+## ⌛ Ongoing
+
+- Support Model Context Protocol and External Tool Migration
+- Direct import from Github
+- Add more language support: C++,Python...
+
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).

@@ -1,8 +1,8 @@
 # 🧠 aidecode Editor – AI-Powered Web IDE
 
-![aidecode Editor Thumbnail](public/aide-code-editor-thumbnail.svg)
 
-**aidecode Editor** is a blazing-fast, AI-integrated web IDE built entirely in the browser using **Next.js App Router**, **WebContainers**, **Monaco Editor**, and **local LLMs via Ollama**. It offers real-time code execution, an AI-powered chat assistant, and support for multiple tech stacks — all wrapped in a stunning developer-first UI.
+
+**AIDE (A IDE)** is a blazing-fast, AI-integrated web IDE built entirely in the browser using **Next.js App Router**, **WebContainers**, **Monaco Editor**, and **local LLMs via Ollama**. It offers real-time code execution, an AI-powered chat assistant, and support for multiple tech stacks — all wrapped in a stunning developer-first UI.
 
 ---
 
@@ -23,17 +23,17 @@
 
 ## 🧱 Tech Stack
 
-| Layer         | Technology                                   |
-|---------------|----------------------------------------------|
-| Framework     | Next.js 15 (App Router)                      |
-| Styling       | TailwindCSS, ShadCN UI                       |
-| Language      | TypeScript                                   |
-| Auth          | NextAuth (Google + GitHub OAuth)             |
-| Editor        | Monaco Editor                                |
-| AI Suggestion | Ollama (LLMs running locally via Docker)     |
-| Runtime       | WebContainers                                |
-| Terminal      | xterm.js                                     |
-| Database      | MongoDB (via DATABASE_URL)                   |
+| Layer         | Technology                                      |
+|---------------|-------------------------------------------------|
+| Framework     | Next.js 15 (App Router)                         |
+| Styling       | TailwindCSS, ShadCN UI                          |
+| Language      | TypeScript                                      |
+| Auth          | NextAuth (Google + GitHub OAuth)                |
+| Editor        | Monaco Editor                                   |
+| AI Suggestion | Ollama (LLMs running locally via Docker)/Gemini |
+| Runtime       | WebContainers                                   |
+| Terminal      | xterm.js                                        |
+| Database      | MongoDB (via DATABASE_URL)                      |
 
 ---
 
@@ -54,10 +54,10 @@ npm install
 
 ### 3. Set Up Environment Variables
 
-Create a `.env.local` file using the template:
+Create a `.env` file using the template:
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
 Then, fill in your credentials:
@@ -70,6 +70,8 @@ AUTH_GITHUB_ID=your_github_client_id
 AUTH_GITHUB_SECRET=your_github_secret
 DATABASE_URL=your_mongodb_connection_string
 NEXTAUTH_URL=http://localhost:3000
+GEMINI_API_KEY=your API Key for Gemini
+OLLAMA_API_URL=http://localhost:11434
 ```
 
 ### 4. Start Local Ollama Model
@@ -80,7 +82,18 @@ Make sure [Ollama](https://ollama.com/) and Docker are installed, then run:
 ollama run codellama
 ```
 
-Or use your preferred model that supports code generation.
+Or use your preferred model that supports code generation
+
+To use your custom model:
+1. Add corresponding API key in `.env`
+2. Navigate to `app/api/chat/route.ts` and `app/api/code-suggestion/route.ts`
+3. Copy the existing `generateAISuggestion` and `generateAIResponse` functions (currently provided for Ollama and Gemini)
+4. Create your own AI model functions following the same pattern
+5. Replace the function call in this line:
+   ```typescript
+   const aiResponse = await generateAIResponseGemini(messages)
+   ```
+   with your custom function name
 
 ### 5. Run the Development Server
 
@@ -112,22 +125,6 @@ Visit `http://localhost:3000` in your browser.
 
 * `Ctrl + Space` or `Double Enter`: Trigger AI suggestions
 * `Tab`: Accept AI suggestion
-* `/`: Open Command Palette (if implemented)
-
----
-
-## ✅ Roadmap
-
-* [x] Google & GitHub Auth via NextAuth
-* [x] Multiple stack templates
-* [x] Monaco Editor + AI
-* [x] WebContainers + terminal
-* [x] AI chat for code assistance
-* [ ] GitHub repo import/export
-* [ ] Save/load playground from DB
-* [ ] Real-time collaboration
-* [ ] Plugin system for templates/tools
-* [ ] One-click deploy via Vercel/Netlify
 
 ---
 

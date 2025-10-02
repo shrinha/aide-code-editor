@@ -1,5 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+// Ensure environment variables are loaded
+if (!process.env.GEMINI_API_KEY) {
+  console.warn("GEMINI_API_KEY not found in environment variables")
+}
+
 interface ChatMessage {
   role: "user" | "assistant"
   content: string
@@ -14,7 +19,10 @@ interface EnhancePromptRequest {
   }
 }
 
-async function generateAIResponse(messages: ChatMessage[]) {
+/**
+ * Generate AI response using Ollama API
+ */
+async function generateAIResponseOllama(messages: ChatMessage[]) {
   const systemPrompt = `You are an expert AI coding assistant. You help developers with:
 - Code explanations and debugging
 - Best practices and architecture advice
@@ -76,6 +84,97 @@ Keep responses concise but comprehensive. Use code blocks with language specific
     throw error
   }
 }
+
+
+/**
+ * Generate AI response using Gemini 2.5 API
+ */
+async function generateAIResponseGemini(messages: ChatMessage[]) {
+  const systemPrompt = `You are an expert AI coding assistant. You help developers with:
+- Code explanations and debugging
+- Best practices and architecture advice
+- Writing clean, efficient code
+- Troubleshooting errors
+- Code reviews and optimizations
+
+Always provide clear, practical answers. When showing code, use proper formatting with language-specific syntax.
+Keep responses concise but comprehensive. Use code blocks with language specification when providing code examples.`;
+
+  // Prepare contents array with valid roles
+  const contents = [
+    { role: "user", parts: [{ text: systemPrompt }] }, // system prompt as user
+    ...messages.map((msg) => ({
+      role: msg.role === "assistant" ? "model" : "user",
+      parts: [{ text: msg.content }],
+    })),
+  ];
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+  
+
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not configured in environment variables");
+    }
+
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey,
+        },
+        body: JSON.stringify({
+          contents,
+          generationConfig: {
+            temperature: 0.7,
+            topP: 0.9,
+            maxOutputTokens: 1000,
+          },
+        }),
+        signal: controller.signal,
+      }
+    );
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Error from Gemini API:", errorText);
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    const suggestion = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+
+    if (!suggestion) {
+      throw new Error("No response from Gemini API");
+    }
+
+    // Optional: clean code blocks (same as before)
+    let cleaned = suggestion;
+    if (cleaned.includes("```")) {
+      const codeMatch = cleaned.match(/```[\w]*\n?([\s\S]*?)```/);
+      cleaned = codeMatch ? codeMatch[1].trim() : cleaned;
+    }
+    cleaned = cleaned.replace(/\|CURSOR\|/g, "").trim();
+
+    return cleaned;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if ((error as Error).name === "AbortError") {
+      throw new Error("Request timeout: AI model took too long to respond");
+    }
+    console.error("AI generation error:", error);
+    throw error;
+  }
+}
+
+
 
 async function enhancePrompt(request: EnhancePromptRequest) {
   const enhancementPrompt = `You are a prompt enhancement assistant. Take the user's basic prompt and enhance it to be more specific, detailed, and effective for a coding AI assistant.
@@ -152,8 +251,9 @@ export async function POST(req: NextRequest) {
 
     const recentHistory = validHistory.slice(-10)
     const messages: ChatMessage[] = [...recentHistory, { role: "user", content: message }]
-
-    const aiResponse = await generateAIResponse(messages)
+    
+    //insert the function according to AI Model
+    const aiResponse = await generateAIResponseGemini(messages)
 
     if (!aiResponse) {
       throw new Error("Empty response from AI model")

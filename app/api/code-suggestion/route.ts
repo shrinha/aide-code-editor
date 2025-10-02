@@ -37,8 +37,8 @@ export async function POST(request: NextRequest) {
     // Build AI prompt
     const prompt = buildPrompt(context, suggestionType)
 
-    // Call AI service (replace with your AI service)
-    const suggestion = await generateSuggestion(prompt)
+    // Call AI service (replace with your AI service function)
+    const suggestion = await generateSuggestionGemini(prompt)
 
     return NextResponse.json({
       suggestion,
@@ -125,11 +125,13 @@ Generate suggestion:`
 }
 
 /**
- * Generate suggestion using AI service
+ * Generate suggestion using AI service Ollama
  */
-async function generateSuggestion(prompt: string): Promise<string> {
+async function generateSuggestionOllama(prompt: string): Promise<string> {
   try {
     // Replace this with your actual AI service call
+
+    //for local Ollama server
     const response = await fetch("http://localhost:11434/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -151,7 +153,8 @@ async function generateSuggestion(prompt: string): Promise<string> {
     const data = await response.json()
     let suggestion = data.response
 
-    // Clean up the suggestion
+
+    // Clean up the suggestion from here......
     if (suggestion.includes("```")) {
       const codeMatch = suggestion.match(/```[\w]*\n?([\s\S]*?)```/)
       suggestion = codeMatch ? codeMatch[1].trim() : suggestion
@@ -166,6 +169,69 @@ async function generateSuggestion(prompt: string): Promise<string> {
     return "// AI suggestion unavailable"
   }
 }
+
+
+
+/**
+ * Generate suggestion using AI service Gemini
+ */
+async function generateSuggestionGemini(prompt: string): Promise<string> {
+  try {
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.GEMINI_API_KEY}`, // your Gemini API key
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: prompt }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 300,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // Gemini responses come inside candidates[0].content.parts
+    let suggestion = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+
+
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // Clean up the suggestion from here......
+    if (suggestion.includes("```")) {
+      const codeMatch = suggestion.match(/```[\w]*\n?([\s\S]*?)```/)
+      suggestion = codeMatch ? codeMatch[1].trim() : suggestion
+    }
+
+    // Remove cursor markers if present
+    suggestion = suggestion.replace(/\|CURSOR\|/g, "").trim()
+
+    return suggestion
+  } catch (error) {
+    console.error("AI generation error:", error)
+    return "// AI suggestion unavailable"
+  }
+}
+
+
+
+
+
 
 // Helper functions for code analysis
 function detectLanguage(content: string, fileName?: string): string {

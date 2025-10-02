@@ -178,12 +178,12 @@ async function generateSuggestionOllama(prompt: string): Promise<string> {
 async function generateSuggestionGemini(prompt: string): Promise<string> {
   try {
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.GEMINI_API_KEY}`, // your Gemini API key
+          "x-goog-api-key": process.env.GEMINI_API_KEY, // use this header instead of Authorization
         },
         body: JSON.stringify({
           contents: [
@@ -201,35 +201,27 @@ async function generateSuggestionGemini(prompt: string): Promise<string> {
     );
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-
-    // Gemini responses come inside candidates[0].content.parts
     let suggestion = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
-
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-    // Clean up the suggestion from here......
+    // Clean up code blocks
     if (suggestion.includes("```")) {
-      const codeMatch = suggestion.match(/```[\w]*\n?([\s\S]*?)```/)
-      suggestion = codeMatch ? codeMatch[1].trim() : suggestion
+      const codeMatch = suggestion.match(/```[\w]*\n?([\s\S]*?)```/);
+      suggestion = codeMatch ? codeMatch[1].trim() : suggestion;
     }
 
-    // Remove cursor markers if present
-    suggestion = suggestion.replace(/\|CURSOR\|/g, "").trim()
+    suggestion = suggestion.replace(/\|CURSOR\|/g, "").trim();
+    return suggestion;
 
-    return suggestion
   } catch (error) {
-    console.error("AI generation error:", error)
-    return "// AI suggestion unavailable"
+    console.error("AI generation error:", error);
+    return "// AI suggestion unavailable";
   }
 }
-
-
-
 
 
 

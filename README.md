@@ -1,4 +1,4 @@
-# 🧠 aidecode Editor – AI-Powered Web IDE
+# 🧠 AideCode Editor – AI-Powered Web IDE
 
 
 
@@ -142,5 +142,5 @@ This project is licensed under the [MIT License](LICENSE).
 * [xterm.js](https://xtermjs.org/)
 * [NextAuth.js](https://next-auth.js.org/)
 
-```
+
 

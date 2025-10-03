@@ -209,6 +209,7 @@ const MainPlaygroundPage: React.FC = () => {
         const updatedTemplateData = JSON.parse(
           JSON.stringify(latestTemplateData)
         );
+        
         const updateFileContent = (items: any[]) =>
           items.map((item) => {
             if ("folderName" in item) {

@@ -176,6 +176,11 @@ async function generateSuggestionOllama(prompt: string): Promise<string> {
  * Generate suggestion using AI service Gemini
  */
 async function generateSuggestionGemini(prompt: string): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY environment variable is missing");
+  }
+
   try {
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
@@ -183,7 +188,7 @@ async function generateSuggestionGemini(prompt: string): Promise<string> {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-goog-api-key": process.env.GEMINI_API_KEY, // use this header instead of Authorization
+          "x-goog-api-key": apiKey, // use this header instead of Authorization
         },
         body: JSON.stringify({
           contents: [

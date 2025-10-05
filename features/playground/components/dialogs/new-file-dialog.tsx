@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React from "react";
+import { useTypingAudio } from "@/hooks/use-audio";
 
 interface NewFileDialogProps {
   isOpen: boolean;
@@ -22,6 +23,9 @@ interface NewFileDialogProps {
 function NewFileDialog({ isOpen, onClose, onCreateFile }: NewFileDialogProps) {
   const [filename, setFilename] = React.useState("");
   const [extension, setExtension] = React.useState("js");
+  
+  // Audio hook for typing sounds
+  const { playTypingSound } = useTypingAudio();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +54,10 @@ function NewFileDialog({ isOpen, onClose, onCreateFile }: NewFileDialogProps) {
               <Input
                 id="filename"
                 value={filename}
-                onChange={(e) => setFilename(e.target.value)}
+                onChange={(e) => {
+                  setFilename(e.target.value);
+                  playTypingSound();
+                }}
                 className="col-span-2"
                 autoFocus
                 placeholder="main"
@@ -63,7 +70,10 @@ function NewFileDialog({ isOpen, onClose, onCreateFile }: NewFileDialogProps) {
               <Input
                 id="extension"
                 value={extension}
-                onChange={(e) => setExtension(e.target.value)}
+                onChange={(e) => {
+                  setExtension(e.target.value);
+                  playTypingSound();
+                }}
                 className="col-span-2"
                 placeholder="js"
               />

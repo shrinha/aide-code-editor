@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { useTypingAudio } from "@/hooks/use-audio";
 
 // TemplateSelectionModal.tsx
 type TemplateSelectionModalProps = {
@@ -148,6 +149,9 @@ const TemplateSelectionModal = ({
   >("all");
   const [projectName, setProjectName] = useState("");
 
+  // Audio hook for typing sounds
+  const { playTypingSound } = useTypingAudio();
+
   const filteredTemplates = templates.filter((template) => {
     const matchesSearch =
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -260,7 +264,10 @@ const TemplateSelectionModal = ({
                   <Input
                     placeholder="Search templates..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      playTypingSound();
+                    }}
                     className="pl-10"
                   />
                 </div>
@@ -268,7 +275,7 @@ const TemplateSelectionModal = ({
                 <Tabs
                   defaultValue="all"
                   className="w-full sm:w-auto"
-                  onValueChange={(value) => setCategory(value as any)}
+                  onValueChange={(value) => setCategory(value as "all" | "frontend" | "backend" | "fullstack")}
                 >
                   <TabsList className="grid grid-cols-4 w-full sm:w-[400px]">
                     <TabsTrigger value="all">All</TabsTrigger>
@@ -425,7 +432,10 @@ const TemplateSelectionModal = ({
                   id="project-name"
                   placeholder="my-awesome-project"
                   value={projectName}
-                  onChange={(e) => setProjectName(e.target.value)}
+                  onChange={(e) => {
+                    setProjectName(e.target.value);
+                    playTypingSound();
+                  }}
                 />
               </div>
 

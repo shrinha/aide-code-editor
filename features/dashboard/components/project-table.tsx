@@ -54,6 +54,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { MarkedToggleButton } from "./toggle-star";
+import { useTypingAudio } from "@/hooks/use-audio";
 
 interface ProjectTableProps {
   projects: Project[];
@@ -87,6 +88,9 @@ export default function ProjectTable({
   });
   const [isLoading, setIsLoading] = useState(false);
   const [favoutrie, setFavourite] = useState(false);
+
+  // Audio hook for typing sounds
+  const { playTypingSound } = useTypingAudio();
 
   const handleEditClick = (project: Project) => {
     setSelectedProject(project);
@@ -313,9 +317,10 @@ export default function ProjectTable({
               <Input
                 id="title"
                 value={editData.title}
-                onChange={(e) =>
-                  setEditData((prev) => ({ ...prev, title: e.target.value }))
-                }
+                onChange={(e) => {
+                  setEditData((prev) => ({ ...prev, title: e.target.value }));
+                  playTypingSound();
+                }}
                 placeholder="Enter project title"
               />
             </div>
@@ -324,12 +329,13 @@ export default function ProjectTable({
               <Textarea
                 id="description"
                 value={editData.description}
-                onChange={(e) =>
+                onChange={(e) => {
                   setEditData((prev) => ({
                     ...prev,
                     description: e.target.value,
-                  }))
-                }
+                  }));
+                  playTypingSound();
+                }}
                 placeholder="Enter project description"
                 rows={3}
               />

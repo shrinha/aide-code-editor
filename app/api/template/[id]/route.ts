@@ -44,8 +44,12 @@ export async function GET(
 
   try {
     const inputPath = path.join(process.cwd(), "public", templatePath);
-    // const outputFile = path.join(process.cwd(), `output/${templateKey}.json`);
-    const outputFile = path.join("/tmp", `${templateKey}.json`);
+    let outputFile: string;
+    if (process.env.NODE_ENV === "development") {
+      outputFile = path.join(process.cwd(), `output/${templateKey}.json`);
+    } else {
+      outputFile = path.join("/tmp", `${templateKey}.json`);
+    }
 
     console.log("Process CWD:", process.cwd());
     console.log("Input Path:", inputPath);

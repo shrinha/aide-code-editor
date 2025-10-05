@@ -3,7 +3,6 @@ import { db } from "@/lib/db";
 import { templatePaths } from "@/lib/template";
 import path from "path";
 import fs from "fs/promises";
-import fsSync from "fs";
 import { NextRequest } from "next/server";
 
 // Helper function to ensure valid JSON
@@ -45,16 +44,13 @@ export async function GET(
 
   try {
     const inputPath = path.join(process.cwd(), "public", templatePath);
-    const outputFile = path.join(process.cwd(), `output/${templateKey}.json`);
+    // const outputFile = path.join(process.cwd(), `output/${templateKey}.json`);
+    const outputFile = path.join("/tmp", `${templateKey}.json`);
 
     console.log("Process CWD:", process.cwd());
     console.log("Input Path:", inputPath);
     console.log("Output Path:", outputFile);
-    console.log("Listing files in input path");
-    
-    fsSync.readdirSync(process.cwd()).forEach(file => {
-      console.log("Files in CWD:", file);
-    });
+
 
     // Check that input path exists before attempting to scan
     try {

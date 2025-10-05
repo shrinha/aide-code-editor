@@ -49,7 +49,11 @@ export async function GET(
     console.log("Process CWD:", process.cwd());
     console.log("Input Path:", inputPath);
     console.log("Output Path:", outputFile);
-    console.log("Check", await fs.stat(path.join(process.cwd(), `prisma`)));
+    console.log("Listing files in input path");
+    
+    fs.readdir(process.cwd()).then(files => {
+      console.log("Files in CWD:", files);
+    });
 
     // Check that input path exists before attempting to scan
     try {

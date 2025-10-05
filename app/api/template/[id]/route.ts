@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { templatePaths } from "@/lib/template";
 import path from "path";
 import fs from "fs/promises";
+import fsSync from "fs";
 import { NextRequest } from "next/server";
 
 // Helper function to ensure valid JSON
@@ -51,8 +52,8 @@ export async function GET(
     console.log("Output Path:", outputFile);
     console.log("Listing files in input path");
     
-    fs.readdir(process.cwd()).then(files => {
-      console.log("Files in CWD:", files);
+    fsSync.readdirSync(process.cwd()).forEach(file => {
+      console.log("Files in CWD:", file);
     });
 
     // Check that input path exists before attempting to scan

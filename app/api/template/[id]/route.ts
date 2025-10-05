@@ -49,6 +49,7 @@ export async function GET(
     console.log("Process CWD:", process.cwd());
     console.log("Input Path:", inputPath);
     console.log("Output Path:", outputFile);
+    console.log("Check", await fs.stat(path.join(process.cwd(), `prisma`)));
 
     // Check that input path exists before attempting to scan
     try {

@@ -44,7 +44,7 @@ export async function GET(
   }
 
   try {
-    const inputPath = path.join(process.cwd(), templatePath);
+    const inputPath = path.join(process.cwd(), "public", templatePath);
     const outputFile = path.join(process.cwd(), `output/${templateKey}.json`);
 
     console.log("Process CWD:", process.cwd());
